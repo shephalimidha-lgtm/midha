@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Midha Trading Company - Milk Khata</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f4f6;color:#202124;font-family:Arial,sans-serif}
+header{background:#171717;color:white;padding:22px 16px;text-align:center}
+header h1{margin:0;color:#e5b52e;font-size:25px}
+header p{margin:6px 0 0;color:#ddd}
+main{max-width:950px;margin:auto;padding:15px;padding-bottom:90px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{background:white;border-radius:14px;padding:16px;margin-bottom:13px;box-shadow:0 2px 9px #0000000c}
+.stat small{color:#666;font-size:13px}
+.stat strong{display:block;font-size:23px;margin-top:8px}
+.green{color:#168044}.red{color:#c33}
+h2{font-size:18px;margin:0 0 14px}
+button{border:0;border-radius:9px;padding:12px 14px;background:#171717;color:white;font-weight:bold;cursor:pointer}
+.goldbtn{background:#e5b52e;color:#171717}
+.greenbtn{background:#168044}
+.redbtn{background:#c33}
+.lightbtn{background:#eee;color:#222}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+input{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font-size:15px;margin:6px 0 13px;background:white}
+label{font-size:13px;font-weight:bold;color:#444}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.customer{border-top:1px solid #eee;padding:13px 0}
+.customer:first-child{border-top:0}
+.customer strong{font-size:16px}
+.small{font-size:12px;color:#666}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}
+.pill{background:#f1f1f1;border-radius:20px;padding:5px 9px;font-size:12px}
+.pill.paid{background:#e3f5e9;color:#16743b}
+.pill.due{background:#fff0e7;color:#b54c15}
+.customer button{padding:8px 10px;font-size:12px;margin-top:8px}
+.hidden{display:none!important}
+.modal{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:14px;z-index:5}
+.modalbox{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:430px;max-height:90vh;overflow:auto}
+.modalbox h2{margin-bottom:16px}
+.modalfoot{display:flex;gap:8px}
+.modalfoot button{flex:1}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:10px 4px;z-index:3}
+nav button{background:transparent;color:#555;padding:7px 9px;font-size:12px}
+nav button.active{color:#a87900}
+.entry{border-top:1px solid #eee;padding:10px 0;font-size:14px}
+.entry:first-child{border-top:0}
+.empty{text-align:center;color:#777;padding:20px}
+.back{margin-bottom:12px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}.actions{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header><h1>Midha Trading Company</h1><p>Milk Khata & Daily Accounts</p></header>
+<main>
+<section id="homePage">
+<div class="grid">
+<div class="card stat"><small>Today's Sales (Collected)</small><strong class="green" id="todaySales">₹0</strong></div>
+<div class="card stat"><small>Total Money In</small><strong class="green" id="moneyInTotal">₹0</strong></div>
+<div class="card stat"><small>Total Money Out</small><strong class="red" id="moneyOutTotal">₹0</strong></div>
+<div class="card stat"><small>Total Udhaar</small><strong class="red" id="totalDue">₹0</strong></div>
+</div>
+<div class="card"><h2>Quick Actions</h2><div class="actions">
+<button class="goldbtn" onclick="openModal('billModal')">＋ Milk Bill</button>
+<button class="greenbtn" onclick="openModal('inModal')">＋ Money In</button>
+<button class="redbtn" onclick="openModal('outModal')">− Money Out</button>
+<button onclick="openModal('customerModal')">＋ Customer</button>
+</div></div>
+<div class="card"><div class="row"><h2>Customer Paid & Udhaar</h2><span class="small" id="customerCount">0 customers</span></div><div id="customerList"></div></div>
+<div class="card"><h2>Today's Entries</h2><div id="todayEntries"></div></div>
+</section>
+<section id="customerPage" class="hidden">
+<button class="lightbtn back" onclick="showHome()">← Back to Home</button>
+<div class="card"><h2 id="detailName">Customer</h2>
+<div class="grid">
+<div class="stat"><small>Total Collected</small><strong class="green" id="detailPaid">₹0</strong></div>
+<div class="stat"><small>Pending Udhaar</small><strong class="red" id="detailDue">₹0</strong></div>
+</div>
+<div class="actions" style="margin-top:16px">
+<button class="goldbtn" onclick="openBillForCurrent()">Milk Bill</button>
+<button class="greenbtn" onclick="openPaymentForCurrent()">Receive Payment</button>
+<button onclick="openUdhaarForCurrent()">Add Udhaar</button>
+<button class="lightbtn" onclick="sendCustomerStatement()">WhatsApp Statement</button>
+</div></div>
+<div class="card"><h2>Transaction History</h2><div id="customerHistory"></div></div>
+</section>
+</main>
+<nav>
+<button class="active" id="homeNav" onclick="showHome()">⌂<br>Home</button>
+<button onclick="openModal('customerModal')">＋<br>Customer</button>
+<button onclick="openModal('inModal')">₹<br>Money In</button>
+<button onclick="openModal('outModal')">−<br>Money Out</button>
+</nav>
+<div class="modal hidden" id="customerModal"><div class="modalbox"><h2>Add Customer</h2><label>Customer Name *</label><input id="newCustomerName" placeholder="Enter customer name"><div class="modalfoot"><button class="lightbtn" onclick="closeModal('customerModal')">Cancel</button><button class="goldbtn" onclick="addCustomer()">Save Customer</button></div></div></div>
+<div class="modal hidden" id="billModal"><div class="modalbox"><h2>New Milk Bill</h2>
+<label>Customer Name *</label><input id="billName" list="customerNames" placeholder="Select or enter customer">
+<label>Bill Date *</label><input id="billDate" type="date">
+<label>Milk Quantity (litres) *</label><input id="billQty" type="number" min="0.01" step="0.01" placeholder="Example: 2">
+<label>Rate per litre (₹) *</label><input id="billRate" type="number" min="0" step="0.01" placeholder="Example: 60">
+<label>Amount Pending (₹)</label><input id="billPending" type="number" min="0" step="0.01" value="0">
+<p class="small" id="billCalculation">Bill total: ₹0 | Paid now: ₹0</p>
+<div class="modalfoot"><button class="lightbtn" onclick="closeModal('billModal')">Cancel</button><button class="goldbtn" onclick="saveBill()">Save Bill</button></div>
+</div></div>
+<div class="modal hidden" id="inModal"><div class="modalbox"><h2>Money In / Received</h2>
+<label>Received From Whom? *</label><input id="inName" list="customerNames" placeholder="Enter person's/customer's name">
+<label>Amount Received (₹) *</label><input id="inAmount" type="number" min="0.01" step="0.01" placeholder="Enter amount">
+<label>Date *</label><input id="inDate" type="date">
+<label>Note (optional)</label><input id="inNote" placeholder="Payment details">
+<p class="small">If the name matches a customer, this payment will reduce their pending balance.</p>
+<div class="modalfoot"><button class="lightbtn" onclick="closeModal('inModal')">Cancel</button><button class="greenbtn" onclick="saveMoneyIn()">Save Money In</button></div>
+</div></div>
+<div class="modal hidden" id="outModal"><div class="modalbox"><h2>Money Out / Paid</h2>
+<label>Paid To Whom? *</label><input id="outName" placeholder="Enter person's/shop's name">
+<label>Amount Paid (₹) *</label><input id="outAmount" type="number" min="0.01" step="0.01" placeholder="Enter amount">
+<label>Date *</label><input id="outDate" type="date">
+<label>Note (optional)</label><input id="outNote" placeholder="Expense/payment details">
+<div class="modalfoot"><button class="lightbtn" onclick="closeModal('outModal')">Cancel</button><button class="redbtn" onclick="saveMoneyOut()">Save Money Out</button></div>
+</div></div>
+<div class="modal hidden" id="udhaarModal"><div class="modalbox"><h2>Add Udhaar</h2>
+<label>Customer Name *</label><input id="udhaarName" list="customerNames" placeholder="Customer name">
+<label>Amount (₹) *</label><input id="udhaarAmount" type="number" min="0.01" step="0.01" placeholder="Enter amount">
+<label>Date *</label><input id="udhaarDate" type="date">
+<label>Note (optional)</label><input id="udhaarNote" placeholder="Details">
+<div class="modalfoot"><button class="lightbtn" onclick="closeModal('udhaarModal')">Cancel</button><button onclick="saveUdhaar()">Save Udhaar</button></div>
+</div></div>
+<datalist id="customerNames"></datalist>
+<script>
+const KEY="midhaMilkKhataV2";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"customers":[],"entries":[]}');
+let currentCustomer="";
+function saveData(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function money(n){return "₹"+Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:2});}
+function today(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
+function safe(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function openModal(id){document.getElementById(id).classList.remove("hidden");const f=document.querySelector("#"+id+" input[type=date]");if(f&&!f.value)f.value=today();}
+function closeModal(id){document.getElementById(id).classList.add("hidden");}
+function getCustomer(name){return data.customers.find(c=>c.name.toLowerCase()===name.trim().toLowerCase());}
+function ensureCustomer(name){let c=getCustomer(name);if(!c){c={name:name.trim()};data.customers.push(c);}return c;}
+function entriesFor(name){return data.entries.filter(e=>e.customer&&e.customer.toLowerCase()===name.toLowerCase());}
+function entryDate(e){return e.date||today();}
+function addEntry(e){data.entries.push({id:Date.now()+Math.random(),...e});}
+function customerStats(name){
+ const es=entriesFor(name);
+ const paid=es.filter(e=>e.type==="bill"||e.type==="payment").reduce((s,e)=>s+Number(e.paidNow||e.amount||0),0);
+ const due=es.reduce((s,e)=>{if(e.type==="bill"||e.type==="udhaar")return s+Number(e.pendingCreated||e.amount||0);if(e.type==="payment")return s-Number(e.amount||0);return s;},0);
+ return {paid,due:Math.max(0,due)};
+}
+function showHome(){document.getElementById("homePage").classList.remove("hidden");document.getElementById("customerPage").classList.add("hidden");document.getElementById("homeNav").classList.add("active");currentCustomer="";render();}
+function showCustomer(name){currentCustomer=name;document.getElementById("homePage").classList.add("hidden");document.getElementById("customerPage").classList.remove("hidden");document.getElementById("homeNav").classList.remove("active");renderCustomer();}
+function render(){
+ const t=today();
+ const todayCollected=data.entries.filter(e=>entryDate(e)===t&&(e.type==="bill"||e.type==="payment")).reduce((s,e)=>s+Number(e.paidNow||e.amount||0),0);
+ const totalIn=data.entries.filter(e=>e.type==="bill"||e.type==="payment"||e.type==="cashin").reduce((s,e)=>s+Number(e.paidNow||e.amount||0),0);
+ const totalOut=data.entries.filter(e=>e.type==="cashout").reduce((s,e)=>s+Number(e.amount||0),0);
+ const due=data.customers.reduce((s,c)=>s+customerStats(c.name).due,0);
+ document.getElementById("todaySales").textContent=money(todayCollected);
+ document.getElementById("moneyInTotal").textContent=money(totalIn);
+ document.getElementById("moneyOutTotal").textContent=money(totalOut);
+ document.getElementById("totalDue").textContent=money(due);
+ document.getElementById("customerCount").textContent=data.customers.length+" customers";
+ document.getElementById("customerNames").innerHTML=data.customers.map(c=>`<option value="${safe(c.name)}"></option>`).join("");
+ const list=document.getElementById("customerList");
+ list.innerHTML=data.customers.length?data.customers.map((c,i)=>{
+  const st=customerStats(c.name);
+  const todayPaid=entriesFor(c.name).filter(e=>entryDate(e)===t&&(e.type==="bill"||e.type==="payment")).reduce((s,e)=>s+Number(e.paidNow||e.amount||0),0);
+  return `<div class="customer"><div class="row"><strong>${safe(c.name)}</strong><strong class="red">${money(st.due)}</strong></div><div class="pills"><span class="pill paid">Paid today: ${money(todayPaid)}</span><span class="pill">Total paid: ${money(st.paid)}</span><span class="pill due">Udhaar: ${money(st.due)}</span></div><button onclick="showCustomerByIndex(${i})">Open Account</button></div>`;
+ }).join(""):'<div class="empty">No customers yet. Add your first customer.</div>';
+ const todays=data.entries.filter(e=>entryDate(e)===t).slice().reverse();
+ document.getElementById("todayEntries").innerHTML=todays.length?todays.map(entryHTML).join(""):'<div class="empty">No entries today.</div>';
+ if(currentCustomer)renderCustomer();
+}
+function showCustomerByIndex(i){if(data.customers[i])showCustomer(data.customers[i].name);}
+function entryLabel(e){return e.type==="bill"?"Milk Bill":e.type==="payment"?"Customer Payment":e.type==="udhaar"?"Udhaar Added":e.type==="cashin"?"Money In":"Money Out";}
+function entryHTML(e){
+ const amt=e.type==="bill"?e.total:e.amount;
+ const colour=(e.type==="cashout"||e.type==="udhaar")?"red":"green";
+ const person=e.customer||e.person||"";
+ const extra=e.type==="bill"?`<br><span class="small">Paid ${money(e.paidNow)} · Pending ${money(e.pendingCreated)}</span>`:"";
+ return `<div class="entry"><div class="row"><span><b>${entryLabel(e)}</b><br><span class="small">${safe(person)} · ${safe(entryDate(e))}</span>${extra}</span><b class="${colour}">${money(amt)}</b></div></div>`;
+}
+function renderCustomer(){
+ if(!currentCustomer)return;
+ const st=customerStats(currentCustomer);
+ document.getElementById("detailName").textContent=currentCustomer;
+ document.getElementById("detailPaid").textContent=money(st.paid);
+ document.getElementById("detailDue").textContent=money(st.due);
+ const es=entriesFor(currentCustomer).slice().reverse();
+ document.getElementById("customerHistory").innerHTML=es.length?es.map(entryHTML).join(""):'<div class="empty">No transactions yet.</div>';
+}
+function addCustomer(){
+ const name=document.getElementById("newCustomerName").value.trim();
+ if(!name)return alert("Please enter customer name.");
+ if(getCustomer(name))return alert("This customer already exists.");
+ data.customers.push({name});
+ document.getElementById("newCustomerName").value="";
+ closeModal("customerModal");saveData();
+}
+function updateBillCalc(){
+ const q=Number(document.getElementById("billQty").value||0),r=Number(document.getElementById("billRate").value||0),p=Number(document.getElementById("billPending").value||0),total=q*r;
+ document.getElementById("billCalculation").textContent=`Bill total: ${money(total)} | Paid now: ${money(Math.max(0,total-p))}`;
+}
+["billQty","billRate","billPending"].forEach(id=>document.getElementById(id).addEventListener("input",updateBillCalc));
+function openBillForCurrent(){document.getElementById("billName").value=currentCustomer;openModal("billModal");}
+function saveBill(){
+ const name=document.getElementById("billName").value.trim(),date=document.getElementById("billDate").value,qty=Number(document.getElementById("billQty").value),rate=Number(document.getElementById("billRate").value),pending=Number(document.getElementById("billPending").value||0),total=qty*rate;
+ if(!name||!date||qty<=0||rate<0)return alert("Please enter customer, date, quantity and rate.");
+ if(pending<0||pending>total)return alert("Pending amount cannot be greater than the bill total.");
+ ensureCustomer(name);addEntry({type:"bill",customer:name,date,qty,rate,total,paidNow:total-pending,pendingCreated:pending});
+ ["billName","billQty","billRate"].forEach(id=>document.getElementById(id).value="");document.getElementById("billPending").value="0";
+ closeModal("billModal");saveData();
+}
+function openPaymentForCurrent(){document.getElementById("inName").value=currentCustomer;openModal("inModal");}
+function saveMoneyIn(){
+ const name=document.getElementById("inName").value.trim(),amount=Number(document.getElementById("inAmount").value),date=document.getElementById("inDate").value,note=document.getElementById("inNote").value.trim();
+ if(!name)return alert("Please enter who the money was received from.");
+ if(!date||amount<=0)return alert("Please enter a valid amount and date.");
+ if(getCustomer(name))addEntry({type:"payment",customer:getCustomer(name).name,amount,date,note});
+ else addEntry({type:"cashin",person:name,amount,date,note});
+ ["inName","inAmount","inNote"].forEach(id=>document.getElementById(id).value="");closeModal("inModal");saveData();
+}
+function saveMoneyOut(){
+ const name=document.getElementById("outName").value.trim(),amount=Number(document.getElementById("outAmount").value),date=document.getElementById("outDate").value,note=document.getElementById("outNote").value.trim();
+ if(!name)return alert("Please enter who the money was paid to.");
+ if(!date||amount<=0)return alert("Please enter a valid amount and date.");
+ addEntry({type:"cashout",person:name,amount,date,note});
+ ["outName","outAmount","outNote"].forEach(id=>document.getElementById(id).value="");closeModal("outModal");saveData();
+}
+function openUdhaarForCurrent(){document.getElementById("udhaarName").value=currentCustomer;openModal("udhaarModal");}
+function saveUdhaar(){
+ const name=document.getElementById("udhaarName").value.trim(),amount=Number(document.getElementById("udhaarAmount").value),date=document.getElementById("udhaarDate").value,note=document.getElementById("udhaarNote").value.trim();
+ if(!name)return alert("Please enter customer name.");
+ if(!date||amount<=0)return alert("Please enter a valid amount and date.");
+ ensureCustomer(name);addEntry({type:"udhaar",customer:name,amount,date,note});
+ ["udhaarName","udhaarAmount","udhaarNote"].forEach(id=>document.getElementById(id).value="");closeModal("udhaarModal");saveData();
+}
+/* WhatsApp statement: bills + final pending only. No payment received or total paid lines. */
+function sendCustomerStatement(){
+ if(!currentCustomer)return;
+ const st=customerStats(currentCustomer),es=entriesFor(currentCustomer);
+ const lines=es.map(e=>{
+  if(e.type==="bill")return `${entryDate(e)} Milk Bill: ${money(e.total)}`;
+  if(e.type==="udhaar")return `${entryDate(e)} Udhaar Added: ${money(e.amount)}`;
+  return "";
+ }).filter(Boolean);
+ const message=`*Midha Trading Company*\n*Milk Khata Statement*\n\nCustomer: ${currentCustomer}\n\n${lines.join("\n")}\n\n*Total Amount to Be Paid: ${money(st.due)}*`;
+ window.open("https://wa.me/?text="+encodeURIComponent(message),"_blank");
+}
+["billDate","inDate","outDate","udhaarDate"].forEach(id=>document.getElementById(id).value=today());
+render();
+</script>
+</body>
+</html>
